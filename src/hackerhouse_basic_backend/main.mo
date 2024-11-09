@@ -19,17 +19,21 @@ actor {
 
     public shared ({ caller }) func setUserProfile(name : Text) : async Result.Result<{ id : Nat; name : Text }, Text> {
         switch (Map.get(userIdMap, phash, caller)) {
-            case(?idFound) return #err("User already has id: " # Nat.toText(idFound));
-                case(_) {};
+            case (?_x) {};
+            case(_) {
+                Map.set(userIdMap, phash, caller, autoIndex);
+                autoIndex += 1;
+            };
         };
-        
-        Map.set(userIdMap, phash, caller, autoIndex);
 
-        Map.set(userProfileMap, nhash, autoIndex, name);
+        let foundId = switch (Map.get(userIdMap, phash, caller)) {
+            case (?found) found;
+            case (_) { return #err("User not found") };
+        };
 
-        autoIndex += 1;
+        Map.set(userProfileMap, nhash, foundId, name);
         
-        return #ok({ id = autoIndex - 1; name = name });
+        return #ok({ id = foundId; name = name });
     };
 
     public shared ({ caller }) func addUserResult(result : Text) : async Result.Result<{ id : Nat; results : [Text] }, Text> {
