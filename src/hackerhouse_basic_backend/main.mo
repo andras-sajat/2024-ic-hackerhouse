@@ -5,14 +5,31 @@ import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Text "mo:base/Text";
 import Cycles "mo:base/ExperimentalCycles";
+import Map "mo:map/Map";
+import {phash; nhash} "mo:map/Map";
 
 actor {
+    stable var autoIndex = 0;
+    let userIdMap = Map.new<Principal, Nat>();
+    let userProfileMap = Map.new<Nat, Text>();
+
     public query ({ caller }) func getUserProfile() : async Result.Result<{ id : Nat; name : Text }, Text> {
-        return #ok({ id = 123; name = "test" });
+        return #ok({ id = 1233; name = "test" });
     };
 
     public shared ({ caller }) func setUserProfile(name : Text) : async Result.Result<{ id : Nat; name : Text }, Text> {
-        return #ok({ id = 123; name = "test" });
+        switch (Map.get(userIdMap, phash, caller)) {
+            case(?idFound) return #err("User already has id: " # Nat.toText(idFound));
+                case(_) {};
+        };
+        
+        Map.set(userIdMap, phash, caller, autoIndex);
+
+        Map.set(userProfileMap, nhash, autoIndex, name);
+
+        autoIndex += 1;
+        
+        return #ok({ id = autoIndex - 1; name = name });
     };
 
     public shared ({ caller }) func addUserResult(result : Text) : async Result.Result<{ id : Nat; results : [Text] }, Text> {
