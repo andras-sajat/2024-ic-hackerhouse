@@ -6,7 +6,7 @@ import Blob "mo:base/Blob";
 import Text "mo:base/Text";
 import Cycles "mo:base/ExperimentalCycles";
 import Map "mo:map/Map";
-import {phash; nhash} "mo:map/Map";
+import { phash; nhash } "mo:map/Map";
 
 actor {
     stable var autoIndex = 0;
